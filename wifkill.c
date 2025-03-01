@@ -5,11 +5,8 @@
 #include <netinet/if_ether.h>
 #include <netinet/ip.h>
 #include <arpa/inet.h>
-
 #include "radiotap/radiotap.h"
 #include "utils/dot11.h"
-
-#include <arpa/inet.h>  // Для ntohs()
 
 int is_beacon_frame(const uint8_t *packet, uint8_t rt_len) {
 	uint16_t frame_control = ntohs	(*(uint16_t *)(packet + rt_len));
@@ -21,34 +18,46 @@ void packet_handler(u_char *user, const struct pcap_pkthdr *h, const u_char *pac
 	if (radiotap_parse(packet, &data) == 0) {	
 		int next_offset = data.rt_header -> it_len;
 
-		FrameControl *fc = (FrameControl *)packet;
+		uint8_t idx = 0;
+/*		dot11_frame_header *dot11_frame = malloc(sizeof(dot11_frame_header));
+		memset(&dot11_frame, 0, sizeof(dot11_frame_header));
+		dot11_frame = (dot11_frame_header *)(packet + data.rt_header -> it_len);	
+		printf("type=%06x\n", dot11_frame->addr1);
+*/
+		dot11_frame_header *dot11_frame = (dot11_frame_header *)(packet + data.rt_header->it_len);
 
-		printf("type=%02x, subtype=%02x\n", fc->type, fc->subtype);
-
-		printf("\n\n");
-
+		printf("MAC: %02X:%02X:%02X:%02X:%02X:%02X\n",
+			dot11_frame->addr1[0], dot11_frame->addr1[1], dot11_frame->addr1[2], 
+			dot11_frame->addr1[3], dot11_frame->addr1[4], dot11_frame->addr1[5]);
+	 
+		
 		for (int i = next_offset; i < h -> len; i++) {
-			printf("%02x ", packet[i]);
-			if ((i + 1) % 16 == 0) printf("\n");
+			if ((idx) % 16 == 0) printf("%04x  ", idx);
+			printf("%02x ", (packet[i]));
+			if ((idx + 1) % 8 == 0) printf("  ");
+			if ((idx + 1) % 16 == 0) printf("\n");
+			idx++;
 		}
 
 	} else {
 		
 	}
+
+	printf("\n\n");
 }
 
 int main() {
-    pcap_t *handle;
-    char errbuf[PCAP_ERRBUF_SIZE];
-    char *dev = "radio0mon";
+	pcap_t *handle;
+	char errbuf[PCAP_ERRBUF_SIZE];
+	char *dev = "radio0mon";
     
-    //handle = pcap_open_live(dev, BUFSIZ, 1000, 1, errbuf);
-	handle = pcap_open_offline("beacon.pcapng", errbuf);
-    if (handle == NULL) {
+	//handle = pcap_open_live(dev, BUFSIZ, 1000, 1, errbuf);
+	handle = pcap_open_offline("test.pcapng", errbuf);
+	if (handle == NULL) {
 		printf("Error opening device %s\n", errbuf);
 		return 1;
 	}
-	
+
 	if (pcap_loop(handle, 0, packet_handler, NULL)) {
 		printf("Error capturing packets: %s\n", pcap_geterr(handle));
 		return 1;
