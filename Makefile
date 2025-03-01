@@ -1,8 +1,8 @@
 CC = gcc
 CFLAGS = -Wall -Wextra -w -O2 -I./radiotap  # Указываем путь для заголовочных файлов
 LDFLAGS = -lpcap
-OBJ = wifimon.o radiotap/radiotap.o  # Указываем путь для исходников
-TARGET = wifimon
+OBJ = wifkill.o radiotap/radiotap.o  # Указываем путь для исходников
+TARGET = wifkill
 
 all: $(TARGET)
 
@@ -13,8 +13,8 @@ $(TARGET): $(OBJ)
 radiotap/radiotap.o: radiotap/radiotap.c
 	$(CC) $(CFLAGS) -c radiotap/radiotap.c -o radiotap/radiotap.o
 
-wifimon.o: wifimon.c
-	$(CC) $(CFLAGS) -c wifimon.c -o wifimon.o
+wifkill.o: wifkill.c
+	$(CC) $(CFLAGS) -c wifkill.c -o wifkill.o
 
 clean:
 	rm -f $(OBJ) $(TARGET)
