@@ -6,7 +6,7 @@
 #include <netinet/ip.h>
 #include <arpa/inet.h>
 #include "radiotap/radiotap.h"
-#include "utils/dot11.h"
+#include "utils/defs.h"
 
 void packet_handler(u_char *user, const struct pcap_pkthdr *h, const u_char *packet) {
 	ieee80211_radiotap_data_t data;
