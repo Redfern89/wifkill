@@ -119,12 +119,42 @@ typedef struct {
 
 
 /* Management strucures */
+
+typedef struct {
+    uint8_t addr1[MAC_ADDR_LEN];
+    uint8_t addr2[MAC_ADDR_LEN];
+    uint8_t addr3[MAC_ADDR_LEN];
+    fragseq frag_seq;
+} __attribute__((packed)) dot11_assoc_req_frame_header;
+
+typedef struct {
+    uint8_t addr1[MAC_ADDR_LEN];
+    uint8_t addr2[MAC_ADDR_LEN];
+    uint8_t addr3[MAC_ADDR_LEN];
+    fragseq frag_seq;
+} __attribute__((packed)) dot11_assoc_resp_frame_header;
+
 typedef struct {
     uint8_t addr1[MAC_ADDR_LEN];
     uint8_t addr2[MAC_ADDR_LEN];
     uint8_t addr3[MAC_ADDR_LEN];
     fragseq frag_seq;
 } __attribute__((packed)) dot11_beacon_frame_header;
+
+typedef struct {
+    uint8_t addr1[MAC_ADDR_LEN];
+    uint8_t addr2[MAC_ADDR_LEN];
+    uint8_t addr3[MAC_ADDR_LEN];
+    fragseq frag_seq;
+} __attribute__((packed)) dot11_auth_frame_header;
+
+typedef struct {
+    uint8_t addr1[MAC_ADDR_LEN];
+    uint8_t addr2[MAC_ADDR_LEN];
+    uint8_t addr3[MAC_ADDR_LEN];
+    fragseq frag_seq;
+    le16 reason_code;
+} __attribute__((packed)) dot11_deauth_frame_header;
 
 typedef struct {
     uint8_t addr1[MAC_ADDR_LEN];
