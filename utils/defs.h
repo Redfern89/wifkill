@@ -177,6 +177,31 @@ typedef struct {
     fragseq frag_seq;
 } __attribute__((packed)) dot11_action_frame_header;
 
+typedef struct {
+    le16 ess:1;
+    le16 ibss:1;
+    le16 reserved_1:1;
+    le16 reserved_2:1;
+    le16 privacy:1;
+    le16 short_preamble:1;
+    le16 reserved_3:1;
+    le16 reserved_4:1;
+    le16 spec_man:1;
+    le16 qos:1;
+    le16 short_slot_time:1;
+    le16 apsd:1;
+    le16 radio_measurement:1;
+    le16 epd:1;
+    le16 reserver_5:1;
+    le16 reserver_6:1;
+} __attribute((packed)) dot11_fixed_params_capabilities;
+
+typedef struct {
+    le64 timestamp;
+    le16 beacon_interval;
+    dot11_fixed_params_capabilities capabilities;
+} __attribute__((packed)) dot11_fixed_params;
+
 
 /* Control structures */
 
@@ -206,6 +231,9 @@ typedef struct {
     uint8_t addr2[MAC_ADDR_LEN];
     dot11_compressed_block_ack compressed_block_ack;
 } __attribute__((packed)) dot11_block_ack_frame_header;
+
+
+/* Management strutures */
 
 
 #endif

@@ -23,20 +23,26 @@ void packet_handler(u_char *user, const struct pcap_pkthdr *h, const u_char *pac
 			dot11_beacon_frame_header *dot11_beacon = (dot11_beacon_frame_header *)(packet + next_offset);
 			printf("frag: %d, seq: %d\n", dot11_beacon -> frag_seq.frag, dot11_beacon -> frag_seq.seq );
 			
+			
 			printf(MAC_ADDR_FMT, get_mac(dot11_beacon -> addr1));
 			printf("\n");
 			printf(MAC_ADDR_FMT, get_mac(dot11_beacon -> addr2));
 			printf("\n");
 			printf(MAC_ADDR_FMT, get_mac(dot11_beacon -> addr3));
-			/*
-			for (int i = next_offset; i < h -> len; i++) {
-				if ((idx) % 16 == 0) printf("%04x  ", idx);
-				printf("%02x ", (packet[i]));
-				if ((idx + 1) % 8 == 0) printf("  ");
-				if ((idx + 1) % 16 == 0) printf("\n");
-				idx++;
+			
+			next_offset += sizeof(dot11_beacon_frame_header) + sizeof(dot11_fixed_params);
+
+			printf("\n");
+			
+			while (next_offset + 2 <= h -> len) {
+				uint8_t TAG_ID = packet[next_offset];
+				uint8_t TAG_LEN = packet[next_offset +1];
+				
+				printf("Tag: %d (len=%d)\n", TAG_ID, TAG_LEN);
+
+				next_offset += 2 + TAG_LEN;
 			}
-			*/
+			
 		}
 
 	} else {
