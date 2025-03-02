@@ -146,6 +146,13 @@ typedef struct {
     uint8_t addr2[MAC_ADDR_LEN];
     uint8_t addr3[MAC_ADDR_LEN];
     fragseq frag_seq;
+} __attribute__((packed)) dot11_disassoc_frame_header;
+
+typedef struct {
+    uint8_t addr1[MAC_ADDR_LEN];
+    uint8_t addr2[MAC_ADDR_LEN];
+    uint8_t addr3[MAC_ADDR_LEN];
+    fragseq frag_seq;
 } __attribute__((packed)) dot11_auth_frame_header;
 
 typedef struct {

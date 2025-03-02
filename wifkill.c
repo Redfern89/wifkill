@@ -55,10 +55,10 @@ void packet_handler(u_char *user, const struct pcap_pkthdr *h, const u_char *pac
 int main() {
 	pcap_t *handle;
 	char errbuf[PCAP_ERRBUF_SIZE];
-	char *dev = "radio0mon";
+	char *dev = "wlan0mon";
     
-	//handle = pcap_open_live(dev, BUFSIZ, 1000, 1, errbuf);
-	handle = pcap_open_offline("pcap/test.pcapng", errbuf);
+	handle = pcap_open_live(dev, BUFSIZ, 1000, 1, errbuf);
+	//handle = pcap_open_offline("pcap/test.pcapng", errbuf);
 	if (handle == NULL) {
 		printf("Error opening device %s\n", errbuf);
 		return 1;
