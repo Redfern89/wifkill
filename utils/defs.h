@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdint.h>
 
+#define MAC_ADDR_FMT "%02x:%02x:%02x:%02x:%02x:%02x"
 #define MAC_ADDR_LEN 6
 
 /*
@@ -75,7 +76,14 @@ typedef uint64_t le64;
 #endif
 
 #define fc_type_subtype(a,b) (b << 4) | (a << 2)
+#define get_mac(addr) addr[0], addr[1], addr[2], addr[3], addr[4], addr[5]
 
+
+/*
+    IEEE 802.11-2016
+    9.2 MAC frame formats
+      ╰─> 9.2.4.1.1 General
+*/
 typedef struct {
     le16 protocol:2;   // Bit's 0-1 (Protocol Version)
     le16 type:2;       // Bit's 2-3 (Type)
@@ -90,20 +98,84 @@ typedef struct {
     le16 order:1;      // Bit 15 (Order)
 } __attribute__((packed)) FrameControl;
 
-typedef struct {
-    le16 type:8;
-    le16 subtype:8;
-}__attribute__((packed)) FrameControl1;
 
+/*
+    IEEE 802.11-2016
+    9.2 MAC frame formats
+      ╰─> 9.2.3 General frame format
+*/
 
+/* FrameControl general */
 typedef struct {
     FrameControl fc;
     le16 duration;
+}__attribute__((packed)) dot11_frame_header;
+
+/* Fragment, squence */
+typedef struct {
+    le16 frag:4;
+    le16 seq:12;
+}__attribute__((packed)) fragseq;
+
+
+/* Management strucures */
+typedef struct {
     uint8_t addr1[MAC_ADDR_LEN];
     uint8_t addr2[MAC_ADDR_LEN];
     uint8_t addr3[MAC_ADDR_LEN];
-    le16 frag_seq;
-} __attribute__((packed)) dot11_frame_header;
+    fragseq frag_seq;
+} __attribute__((packed)) dot11_beacon_frame_header;
+
+typedef struct {
+    uint8_t addr1[MAC_ADDR_LEN];
+    uint8_t addr2[MAC_ADDR_LEN];
+    uint8_t addr3[MAC_ADDR_LEN];
+    fragseq frag_seq;
+} __attribute__((packed)) dot11_probe_req_frame_header;
+
+typedef struct {
+    uint8_t addr1[MAC_ADDR_LEN];
+    uint8_t addr2[MAC_ADDR_LEN];
+    uint8_t addr3[MAC_ADDR_LEN];
+    fragseq frag_seq;
+} __attribute__((packed)) dot11_probe_resp_frame_header;
+
+typedef struct {
+    uint8_t addr1[MAC_ADDR_LEN];
+    uint8_t addr2[MAC_ADDR_LEN];
+    uint8_t addr3[MAC_ADDR_LEN];
+    fragseq frag_seq;
+} __attribute__((packed)) dot11_action_frame_header;
+
+
+/* Control structures */
+
+typedef struct {
+    uint8_t addr1[MAC_ADDR_LEN];    
+} __attribute__((packed)) dot11_ack_frame_header;
+
+typedef struct {
+    le16 control;
+    fragseq frag_seq;
+} __attribute__((packed)) dot11_compressed_block_ack_req;
+
+typedef struct {
+    le16 control;
+    fragseq frag_seq;
+    le64 bitmap;
+} __attribute__((packed)) dot11_compressed_block_ack;
+
+typedef struct {
+    uint8_t addr1[MAC_ADDR_LEN];
+    uint8_t addr2[MAC_ADDR_LEN];
+    dot11_compressed_block_ack_req compressed_block_ack_req; 
+} __attribute__((packed)) dot11_block_ack_req_frame_header;
+
+typedef struct {
+    uint8_t addr1[MAC_ADDR_LEN];
+    uint8_t addr2[MAC_ADDR_LEN];
+    dot11_compressed_block_ack compressed_block_ack; 
+} __attribute__((packed)) dot11_block_ack_frame_header;
 
 
 #endif
