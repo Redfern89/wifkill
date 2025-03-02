@@ -181,7 +181,7 @@ typedef struct {
 /* Control structures */
 
 typedef struct {
-    uint8_t addr1[MAC_ADDR_LEN];    
+    uint8_t addr1[MAC_ADDR_LEN];
 } __attribute__((packed)) dot11_ack_frame_header;
 
 typedef struct {
@@ -198,13 +198,13 @@ typedef struct {
 typedef struct {
     uint8_t addr1[MAC_ADDR_LEN];
     uint8_t addr2[MAC_ADDR_LEN];
-    dot11_compressed_block_ack_req compressed_block_ack_req; 
+    dot11_compressed_block_ack_req compressed_block_ack_req;
 } __attribute__((packed)) dot11_block_ack_req_frame_header;
 
 typedef struct {
     uint8_t addr1[MAC_ADDR_LEN];
     uint8_t addr2[MAC_ADDR_LEN];
-    dot11_compressed_block_ack compressed_block_ack; 
+    dot11_compressed_block_ack compressed_block_ack;
 } __attribute__((packed)) dot11_block_ack_frame_header;
 
 
