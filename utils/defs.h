@@ -106,83 +106,27 @@ typedef struct {
 */
 
 /* FrameControl general */
-typedef struct {
-    FrameControl fc;
-    le16 duration;
-}__attribute__((packed)) dot11_frame_header;
 
 /* Fragment, squence */
 typedef struct {
     le16 frag:4;
     le16 seq:12;
-}__attribute__((packed)) fragseq;
-
-
-/* Management strucures */
+} __attribute__((packed)) fragseq;
 
 typedef struct {
-    uint8_t addr1[MAC_ADDR_LEN];
+    FrameControl fc;
+    le16 duration;
+    uint8_t addr1[MAC_ADDR_LEN]; // 6
     uint8_t addr2[MAC_ADDR_LEN];
     uint8_t addr3[MAC_ADDR_LEN];
     fragseq frag_seq;
-} __attribute__((packed)) dot11_assoc_req_frame_header;
+} __attribute__((packed)) dot11_mgmt_frame_header;
+
 
 typedef struct {
-    uint8_t addr1[MAC_ADDR_LEN];
-    uint8_t addr2[MAC_ADDR_LEN];
-    uint8_t addr3[MAC_ADDR_LEN];
-    fragseq frag_seq;
-} __attribute__((packed)) dot11_assoc_resp_frame_header;
-
-typedef struct {
-    uint8_t addr1[MAC_ADDR_LEN];
-    uint8_t addr2[MAC_ADDR_LEN];
-    uint8_t addr3[MAC_ADDR_LEN];
-    fragseq frag_seq;
-} __attribute__((packed)) dot11_beacon_frame_header;
-
-typedef struct {
-    uint8_t addr1[MAC_ADDR_LEN];
-    uint8_t addr2[MAC_ADDR_LEN];
-    uint8_t addr3[MAC_ADDR_LEN];
-    fragseq frag_seq;
-} __attribute__((packed)) dot11_disassoc_frame_header;
-
-typedef struct {
-    uint8_t addr1[MAC_ADDR_LEN];
-    uint8_t addr2[MAC_ADDR_LEN];
-    uint8_t addr3[MAC_ADDR_LEN];
-    fragseq frag_seq;
-} __attribute__((packed)) dot11_auth_frame_header;
-
-typedef struct {
-    uint8_t addr1[MAC_ADDR_LEN];
-    uint8_t addr2[MAC_ADDR_LEN];
-    uint8_t addr3[MAC_ADDR_LEN];
-    fragseq frag_seq;
+    dot11_mgmt_frame_header mgmt;
     le16 reason_code;
 } __attribute__((packed)) dot11_deauth_frame_header;
-
-typedef struct {
-    uint8_t addr1[MAC_ADDR_LEN];
-    uint8_t addr2[MAC_ADDR_LEN];
-    uint8_t addr3[MAC_ADDR_LEN];
-    fragseq frag_seq;
-} __attribute__((packed)) dot11_probe_req_frame_header;
-
-typedef struct {
-    uint8_t addr1[MAC_ADDR_LEN];
-    uint8_t addr2[MAC_ADDR_LEN];
-    uint8_t addr3[MAC_ADDR_LEN];
-    fragseq frag_seq;
-} __attribute__((packed)) dot11_probe_resp_frame_header;
-
-typedef struct {
-    uint8_t addr1[MAC_ADDR_LEN];
-    uint8_t addr2[MAC_ADDR_LEN];
-    uint8_t addr3[MAC_ADDR_LEN];
-    fragseq frag_seq;
-} __attribute__((packed)) dot11_action_frame_header;
 
 typedef struct {
     le16 ess:1;
