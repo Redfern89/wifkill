@@ -1,7 +1,7 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -w -O2 -I./radiotap
+CFLAGS = -Wall -Wextra -Wno-unused-variable -O2 -I./radiotap
 LDFLAGS = -lpcap
-OBJ = wifkill.o radiotap/radiotap.o utils/misc.o
+OBJ = wifkill.o radiotap/radiotap.o utils/misc.o utils/80211.o
 TARGET = wifkill
 
 all: $(TARGET)
@@ -15,6 +15,9 @@ radiotap/radiotap.o: radiotap/radiotap.c
 
 utils/misc.o: utils/misc.c
 	$(CC) $(CFLAGS) -c utils/misc.c -o utils/misc.o
+
+utils/80211.o: utils/80211.c
+	$(CC) $(CFLAGS) -c utils/80211.c -o utils/80211.o
 
 wifkill.o: wifkill.c
 	$(CC) $(CFLAGS) -c wifkill.c -o wifkill.o

@@ -6,11 +6,14 @@
 #include <netinet/ip.h>
 #include <arpa/inet.h>
 
+
 #include "utils/misc.h"
 #include "radiotap/radiotap.h"
 #include "utils/defs.h"
 #include "utils/colors.h"
 #include "utils/wpsmon_progress.h"
+#include "utils/80211.h"
+#include <math.h>
 
 
 #define MAX_MACS 250
@@ -40,52 +43,6 @@ void mac_add(uint8_t *mac) {
 	}
 }
 
-void hexdump(const unsigned char *data, int offset, int len) {
-    printf("\n");
-    char ascii[17];  // 16 байт + '\0'
-    int idx = 0;
-
-    for (int i = offset; i < len; ++i) {
-        // Печатаем адрес с учётом offset
-        if ((i - offset) % 16 == 0) {
-            printf("\e[1;32m%04x\e[0;0m  ", i - offset);
-        }
-
-        // Печатаем данные в шестнадцатеричном виде
-        printf("\e[1;36m%02x ", data[i]);
-
-        // Заполняем массив для вывода ASCII-символов
-        if (data[i] >= 32 && data[i] <= 126) {
-            ascii[(i - offset) % 16] = data[i];  // используем i - offset, чтобы не выйти за пределы
-        } else {
-            ascii[(i - offset) % 16] = '.';  // заменяем непечатаемые символы на '.'
-        }
-
-		if ((i - offset + 1) % 8 == 0) {
-			printf("");
-		}
-		
-        // Когда дойдем до 16 байта или конца, печатаем ASCII строку
-        if ((i - offset + 1) % 16 == 0 || i + 1 == len) {
-            // Завершаем строку для вывода
-            ascii[(i - offset) % 16] = '\0';  // Обеспечиваем корректный null-терминатор
-
-            // Дополняем недостающие байты пробелами для неполных строк
-            int missing_spaces = (16 - ((i - offset + 1) % 16)) % 16;
-            for (int j = 0; j < missing_spaces; ++j) {
-                printf("   ");  // пробелы для недостающих байт
-            }
-
-            printf("\e[0;0m | \e[1;31m%s\e[0;0m", ascii);  // Выводим ASCII
-            printf("\n");
-        }
-
-        ++idx;
-    }
-
-    printf("\n");
-}
-
 void print_header() {
 	fprintf  (stdout, HEAD_COLOR);
 	fprintf  (stdout, "BSSID               Ch    Signal strength    dBm    Frequency    WPS  Lck  Vendor    ESSID\n");
@@ -94,98 +51,12 @@ void print_header() {
 	fprintf  (stdout, RESET_COLOR);
 }
 
-void parse_wps_wps_params(dot11_elt_t *elt, wps_info_t *wps_info) {
-	memset(wps_info, 0, sizeof(wps_info_t));
-	wps_info -> version = 0;
-	wps_info -> is_wps = 0;
-
-	for (int i = 0; i < elt -> count; i++) {
-		uint8_t *elt_info = elt-> elt[i].data;
-		uint8_t elt_id = elt -> elt[i].id;
-		uint8_t elt_len = elt -> elt[i].len;
-
-		if (elt_id == 221 && memcmp(elt_info, WPS_IE, 4) == 0) {
-			wps_info -> is_wps = 1;
-			if (memmem(elt_info, elt_len, WPLS_LOCKED, 5)) {
-				wps_info -> locked = 1;
-			}
-
-			if (memmem(elt_info, elt_len, WPS_RF_BANDS, 2) && memmem(elt_info, elt_len, WPS_RF_BANDS, 2)) {
-				wps_info -> version = 2;
-			} else if (memmem(elt_info, elt_len, WPS_VERSION, 2)) {
-				wps_info -> version = 1;
-			}
-		}
-	}
-}
-
-char *get_hardware_name(dot11_elt_t *elt) {
-	struct vendor {
-		unsigned char id[3];
-		char name[9];
-	};
-	static const struct vendor vendors[] = {
-		{"\x00\x10\x18", "Broadcom"}, // Broadcom
-		{"\x00\x03\x7f", "AtherosC"}, // Atheros Communications
-		{"\x00\x13\x74", "AtherosC"}, // Atheros Communications
-		{"\x00\x0c\x43", "RalinkTe"}, // Ralink Technology, Corp.
-		{"\x00\x17\xa5", "RalinkTe"}, // Ralink Technology, Corp.
-		{"\x00\xe0\x4c", "RealtekS"}, // Realtek Semiconductor Corp.
-		{"\x00\xa0\x00", "Mediatek"}, // Mediatek Corp.
-		{"\x00\x0c\xe7", "Mediatek"}, // Mediatek Corp.
-		{"\x00\x1c\x51", "CelenoCo"}, // Celeno Communications, Inc
-		{"\x00\x50\x43", "MarvellS"}, // Marvell Semiconductor, Inc.
-		{"\x00\x26\x86", "Quantenn"}, // Quantenna Communications, Inc
-		{"\x00\x09\x86", "LantiqML"}, // Lantiq/MetaLink
-		{"\x00\x50\xf2", "Microsof"}, // Microsoft
-		{"\xac\x85\x3d", "HuaweiTe"}, // Huawei Technologies Co., Ltd
-		{"\x88\x12\x4e", "Qualcomm"}, // Qualcomm Atheros
-		{"\x8c\xfd\xf0", "Qualcomm"}, // Qualcomm, Inc
-		{"\x00\xa0\xcc", "Lite-OnC"}, // Lite-On Communications, Inc
-		{"\x40\x45\xda", "SpreadTe"}, // Spreadtrum Technology, Inc
-		{"\x50\x6f\x9a", "Wi-FiAli"}  // Wi-Fi Aliance			
-	};
-	#define VENDORS_COUNT (sizeof(vendors) / sizeof(vendors[0]))
-
-	for (int i = 0; i < elt -> count; i++) {
-		uint8_t *elt_info = elt-> elt[i].data;
-		uint8_t elt_id = elt -> elt[i].id;
-		uint8_t elt_len = elt -> elt[i].len;
-		
-		
-		if (elt_id == 221 && (elt_len > 6 && elt_len <= 9)) {
-			for (size_t j = 0; j < VENDORS_COUNT; j++) {
-				if (memcmp(elt_info, vendors[j].id, 3) == 0) {
-					return vendors[j].name;
-				}
-			}
-		}
-	}
-	return "Unknown ";
-}
-
-char *get_ap_ssid(dot11_elt_t *elt) {
-	for (int i = 0; i < elt -> count; i++) {
-		uint8_t *elt_info = elt-> elt[i].data;
-		uint8_t elt_id = elt -> elt[i].id;
-		uint8_t elt_len = elt -> elt[i].len;
-		
-		if (elt_id == 0) {
-			static char ssid[33];
-			snprintf(ssid, sizeof(ssid), "%.*s", elt_len, elt_info);
-			return ssid; 
-		}
-	}
-
-	return "<hidden>";
-}
 
 void packet_handler(u_char *user, const struct pcap_pkthdr *h, const u_char *packet) {
+	(void)user; 
 	ieee80211_radiotap_data_t rt_data;
 	if (radiotap_parse(packet, &rt_data) == 0) {	
-		int next_offset = rt_data.rt_header -> it_len;
-
-		uint8_t idx = 0;
+		unsigned int next_offset = rt_data.rt_header -> it_len;
 		dot11_mgmt_frame_header *dot11_mgmt_frame = (dot11_mgmt_frame_header *)(packet + next_offset);
 		uint8_t type_subtype = fc_type_subtype(dot11_mgmt_frame -> fc.type, dot11_mgmt_frame -> fc.subtype);
 
@@ -213,11 +84,11 @@ void packet_handler(u_char *user, const struct pcap_pkthdr *h, const u_char *pac
 			if (!is_mac_exists(bssid)) {
 				char *bssid_str = mac2str(bssid, ':');
 				uint8_t channel = rt_data.channel;
-				char *ssid;
-				char *lock_display;
-				char *hardware;
+				char *ssid = NULL;
+				char *lock_display = NULL;
+				char *hardware = {0};
 				char *rssi_color = NULL;
-				char *wps_version;
+				char *wps_version = NULL;
 				int progress_dbm = 0;
 				int dbm = 0;
 				int rssi = 0;
