@@ -65,7 +65,7 @@ void packet_handler(u_char *user, const struct pcap_pkthdr *h, const u_char *pac
 			int elt_offset = next_offset;
 			dot11_elt_t dot11_elt = {0};
 
-;			while (next_offset + 2 <= h -> len) {
+			while (next_offset + 2 <= h -> len) {
 				uint8_t TAG_ID = packet[next_offset];
 				uint8_t TAG_LEN = packet[next_offset +1];
 				
