@@ -4,6 +4,12 @@
 #include <stdio.h>
 #include <stdint.h>
 
+#define WPS_IE "\x00\x50\xF2\x04"
+#define WPS_VERSION "\x10\x4a"
+#define WPS_RF_BANDS "\x10\x3c"
+#define WPS_VENDOR_EXT "\x10\x49"
+#define WPLS_LOCKED "\x10\x57\x00\x01\x01"
+
 #define MAC_ADDR_FMT "%02x:%02x:%02x:%02x:%02x:%02x"
 #define MAC_ADDR_LEN 6
 
@@ -184,7 +190,22 @@ typedef struct {
 } __attribute__((packed)) dot11_block_ack_frame_header;
 
 
-/* Management strutures */
+typedef struct {
+    uint8_t id;
+    uint8_t len;
+    uint8_t data[255];
+} __attribute__((packed)) dot11_elt_entry;
 
+typedef struct {
+    uint8_t count;
+    dot11_elt_entry elt[32];
+} __attribute__((packed)) dot11_elt_t;
+
+
+typedef struct {
+    uint8_t is_wps;
+    uint8_t version;
+    uint8_t locked;
+} wps_info_t;
 
 #endif
