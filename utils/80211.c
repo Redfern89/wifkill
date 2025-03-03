@@ -33,7 +33,7 @@ char *get_hardware_name(dot11_elt_t *elt) {
 		unsigned char id[3];
 		char name[9];
 	};
-	static struct vendor vendors[] = {
+	static const struct vendor vendors[] = {
 		{"\x00\x10\x18", "Broadcom"}, // Broadcom
 		{"\x00\x03\x7f", "AtherosC"}, // Atheros Communications
 		{"\x00\x13\x74", "AtherosC"}, // Atheros Communications
@@ -80,11 +80,13 @@ char *get_ap_ssid(dot11_elt_t *elt) {
 		uint8_t elt_id = elt -> elt[i].id;
 		uint8_t elt_len = elt -> elt[i].len;
 		
-		if (elt_id == 0) {
+		if (elt_id == 0 && elt_len > 0) {
 			snprintf(ssid, sizeof(ssid), "%.*s", elt_len, elt_info);
 			return (char *)ssid; 
+		} else {
+			return "<hidden>";
 		}
 	}
 
-	return strncpy(ssid, "<hidden>", sizeof(ssid));
+	return "<hidden>";
 }
